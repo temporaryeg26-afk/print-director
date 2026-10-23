@@ -117,6 +117,19 @@ label{cursor:pointer}
 .vcard .meta .sz{font-family:var(--mono);color:var(--mu);font-size:11px}
 .vcard .acts{display:flex;gap:6px;padding:0 10px 10px}
 .vcard .acts .btn{flex:1}
+.bcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.bthumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;padding:0 10px}
+.bth{background:var(--p2);border:1px solid var(--line);border-radius:8px;padding:0;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column}
+.bth.win{border-color:var(--ok);opacity:1;box-shadow:0 0 0 1px var(--ok)}
+.bth:not(.win) .bmeta{opacity:.75}
+.bth .bimg{position:relative;aspect-ratio:4/4.3;background:#1A1A1A}
+.bth .bimg canvas{width:100%;height:100%;display:block}
+.bth .bimg .ld{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mu)}
+.bth .badge{position:absolute;top:6px;left:6px;background:var(--ok);color:#0B0B0B;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px}
+.bth .bmeta{padding:6px 7px;display:flex;flex-direction:column;gap:3px}
+.bth .bn{display:flex;justify-content:space-between;align-items:center;gap:6px;font-weight:600;font-size:12px}
+.bcard .tr b{color:var(--tx)}
+@media (max-width:900px){.bcards{grid-template-columns:1fr}}
 .section-title{display:flex;align-items:center;gap:10px;margin:26px 0 8px}
 
 /* print lab */
@@ -212,7 +225,8 @@ label{cursor:pointer}
 <header class="top">
   <div class="brand">TEMPORARY™ <span>PRINT DIRECTOR</span></div>
   <nav class="tabs" id="tabs" aria-label="Main">
-    <button data-tab="director" class="on">Director</button>
+    <button data-tab="best" class="on">Best Picks</button>
+    <button data-tab="director">Director</button>
     <button data-tab="lab">Print Lab</button>
     <button data-tab="compare">Compare</button>
     <button data-tab="export">Export</button>
@@ -1617,6 +1631,7 @@ PD.guide = (function () {
   'use strict';
 
   var TABS = [
+    { tab: 'best', title: 'Best Picks', text: 'Start here. Checks every design on every product and every color, tries every print box and treatment, and shows the winning design with its best setup for each color, with the reason. Approve one card or all of them at once, then Export.' },
     { tab: 'director', title: 'Director', text: 'Pick or upload a design. It is analyzed once, then the Director builds the best version for every product and every color it comes in: size, placement, dots, ink and logo. Approve what you like and download.' },
     { tab: 'lab', title: 'Print Lab', text: 'Open any product/color to fine-tune it by hand: size, dots, pattern, angle, contrast, knockout, clean edges, embroidery. Original vs processed with split view, zoom and pan. Warnings come with Fix buttons.' },
     { tab: 'compare', title: 'Compare', text: 'Put up to four treatments side by side with synchronized zoom, as artwork or on the garment. Promote the winner to the Print Lab.' },
@@ -1627,6 +1642,7 @@ PD.guide = (function () {
   ];
 
   var TOPICS = [
+    { id: 'best', title: 'Which design is best for each product and color', k: ['best', 'best pick', 'best design', 'which design', 'recommend', 'compare designs', 'both designs', 'افضل', 'أفضل', 'احسن', 'أحسن'], steps: ['Open Best Picks (first tab).', 'Each color card shows every design on the garment; the winner is marked BEST with its score and the reason.', 'Click "Approve best" on a card, or "Approve all best picks" at the top.', 'Then Export → All designs → download the ZIP.'], go: 'best' },
     { id: 'upload', title: 'Upload a new design', k: ['upload', 'new design', 'add design', 'import', 'my design', 'رفع', 'تصميم'], steps: ['Open Director.', 'Click "Upload design" (PNG, JPEG or WebP, transparent PNG is best).', 'The analysis runs automatically and the full product grid appears.'], go: 'director' },
     { id: 'all', title: 'See the design on every product and color', k: ['all products', 'every product', 'all colors', 'every color', 'overview', 'grid', 'matrix', 'كل المنتجات', 'الالوان'], steps: ['Open Director and pick the design.', 'Each card is one product + color with the recommended treatment and size.', 'Use the 30 / 20 / Recommended switch to see each print box.'], go: 'director' },
     { id: 'dlall', title: 'Download all the PNGs at once', k: ['download all', 'zip', 'all files', 'everything', 'vendor', 'send', 'تحميل', 'كله'], steps: ['Approve the cards you want (or "Approve all ready" in Director).', 'Open Export and click "Download ZIP".', 'Identical PNGs are merged automatically; file names say size, color and products.'], go: 'export' },
@@ -1684,12 +1700,12 @@ PD.guide = (function () {
   var h = U.h, $ = U.$;
 
   var S = {
-    tab: 'director', designs: [], designId: 'keep-it-real', logoId: 'front-logo', logoMethod: 'emb',
+    tab: 'best', best: { only: null }, designs: [], designId: 'keep-it-real', logoId: 'front-logo', logoMethod: 'emb',
     variants: {}, tests: [], assetsOk: false,
     dir: { box: 'rec', side: 'back', method: 'dtf' },
     lab: { vid: null, view: 'split', bg: 'garment', mockView: null, undo: [], redo: [], locked: false, stitch: true, showWhy: false },
     cmp: { slots: [], mode: 'art' },
-    exp: { design: 'current', drafts: false, merge: true, csv: false, dpi: 300 }
+    exp: { design: 'current', drafts: false, merge: false, csv: false, dpi: 300 }
   };
 
   /* ================= helpers ================= */
@@ -1852,7 +1868,7 @@ PD.guide = (function () {
     U.$$('#tabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
     var v = U.clear($('#view'));
     window.scrollTo(0, 0);
-    ({ director: viewDirector, lab: viewLab, compare: viewCompare, export: viewExport, tests: viewTests, rules: viewRules, guide: viewGuide })[tab](v);
+    ({ best: viewBest, director: viewDirector, lab: viewLab, compare: viewCompare, export: viewExport, tests: viewTests, rules: viewRules, guide: viewGuide })[tab](v);
   }
 
   /* ================= DIRECTOR ================= */
@@ -2069,6 +2085,186 @@ PD.guide = (function () {
         h('button', { class: 'btn sm', onclick: function () { openLab(lv.id); } }, 'Open'),
         st.approved ? h('button', { class: 'btn sm', onclick: function () { unapprove(lv); go('director'); } }, 'Unapprove')
           : h('button', { class: 'btn sm pri', onclick: function () { approve(lv); go('director'); } }, 'Approve')));
+  }
+
+  /* ================= BEST PICKS =================
+   * For every product and color: try every design, every allowed print box and every
+   * treatment the rules consider, apply the safe automatic fixes, score each option
+   * and keep the best. Then rank the designs against each other for that color. */
+  function contrastOn(an, hex) {
+    var g = U.hexToRgb(hex), gl = U.rgbToLab(g[0], g[1], g[2]), tot = 0, sum = 0;
+    an.palette.forEach(function (p) {
+      var c = U.hexToRgb(p.hex), d = U.deltaE(U.rgbToLab(c[0], c[1], c[2]), gl);
+      sum += p.share * Math.min(d, 60) / 60; tot += p.share;
+    });
+    return tot ? sum / tot : 0;
+  }
+  function autoFix(o, ctx) {
+    for (var pass = 0; pass < 3; pass++) {
+      var changed = false;
+      R.warnings(ctx, o).forEach(function (w) {
+        if (w.sev === 'info') return;
+        var f = w.fixes.filter(function (x) { return x.patch.settings && !x.patch.method && !x.manual; })[0];
+        if (f) { Object.assign(o.settings, f.patch.settings); changed = true; }
+      });
+      if (!changed) break;
+    }
+    return o;
+  }
+  function scoreOption(d, p, col, o, ctx, t) {
+    var w = R.warnings(ctx, o);
+    var high = w.filter(function (x) { return x.sev === 'high'; }).length, mid = w.filter(function (x) { return x.sev === 'mid'; }).length, info = w.length - high - mid;
+    var quality = Math.max(0, 50 - 25 * high - 8 * mid - 2 * info);
+    var contrast = contrastOn(d.an, col.hex), s = o.settings;
+    var dots = s.treatment === 'halftone' || s.treatment === 'selective';
+    var dpi = AN.dpiAt(d.an, o.wCm);
+    var sharp = dots ? (s.treatment === 'halftone' ? 1 : 0.85 + 0.15 * Math.min(dpi / t.targetDpi, 1)) : Math.min(dpi / t.targetDpi, 1);
+    var long = Math.max(o.wCm, o.hCm), presence = Math.min(long / 30, 1);
+    var total = quality + 25 * contrast + 15 * sharp + 10 * presence;
+    return { total: Math.round(total), raw: total + (o.isRec ? 0.6 : 0), high: high, mid: mid, info: info, w: w, contrast: contrast, dpi: dpi, sharp: sharp };
+  }
+  function bestFor(d, p, col) {
+    var t = R.T(), opts = [];
+    p.boxes.forEach(function (box) {
+      var ctx = ctxFor(d, p, col, 'main', box, 'dtf'), rec = R.recommend(ctx);
+      var list = [{ label: rec.name, settings: U.deepCopy(rec.settings), isRec: true }];
+      rec.alts.forEach(function (a) { if (a.patch && a.patch.settings) list.push({ label: a.label, settings: Object.assign(U.deepCopy(rec.settings), a.patch.settings), isRec: false }); });
+      list.forEach(function (x) {
+        var o = { kind: 'main', method: 'dtf', boxCm: box, wCm: rec.size.wCm, hCm: rec.size.hCm, offset: { dx: 0, dy: 0 }, settings: x.settings, isRec: x.isRec };
+        autoFix(o, ctx);
+        o.label = treatName(o.settings, 'dtf');
+        o.sc = scoreOption(d, p, col, o, ctx, t);
+        o.ctx = ctx;
+        opts.push(o);
+      });
+    });
+    opts.sort(function (a, b) { return b.sc.raw - a.sc.raw; });
+    return opts[0];
+  }
+  function bestReasons(win, lose, col) {
+    var r = [];
+    if (!lose) return r;
+    var a = win.o.sc, b = lose.o.sc;
+    if (a.contrast - b.contrast > 0.06) r.push('stands out more on ' + col.name + ' (' + pct(a.contrast) + ' vs ' + pct(b.contrast) + ' contrast)');
+    if (a.high < b.high) r.push(lose.d.name + ' has a problem here');
+    else if (a.mid < b.mid) r.push('fewer warnings');
+    if (a.sharp - b.sharp > 0.08) r.push('prints sharper at this size');
+    if (!r.length) r.push(Math.abs(a.total - b.total) <= 3 ? 'both work well — near tie' : 'better overall balance');
+    return r;
+  }
+  function pickVariant(d, p, col, o) {
+    var v = getVariant(d.id, p.id, col.id, 'main', o.boxCm, 'dtf');
+    v.settings = U.deepCopy(o.settings); v.wCm = o.wCm; v.hCm = o.hCm; v.offset = { dx: 0, dy: 0 }; v.userEdited = true;
+    return v;
+  }
+  function scoreClass(n) { return n >= 80 ? 'ok' : n >= 60 ? 'warn' : 'high'; }
+
+  function viewBest(root) {
+    var page = h('div', { class: 'page' });
+    root.appendChild(page);
+    var designs = S.designs.filter(function (x) { return x.type === 'design'; });
+    page.appendChild(spinner('Checking ' + designs.length + ' designs on every product and color…'));
+    var lg = designById(S.logoId);
+    Promise.all(designs.map(function (x) { return loadDesign(x).catch(function () { return null; }); }).concat([lg ? loadDesign(lg).catch(function () { return null; }) : null])).then(function () {
+      if (S.tab !== 'best') return;
+      U.clear(page);
+      buildBest(page, designs.filter(function (x) { return x.an; }));
+    });
+  }
+
+  function buildBest(page, designs) {
+    if (!designs.length) { page.appendChild(h('p', { class: 'muted' }, 'No designs found. Upload one in Director.')); return; }
+    var sel = S.best.only ? designs.filter(function (x) { return S.best.only.indexOf(x.id) >= 0; }) : designs;
+    if (!sel.length) sel = designs;
+    var products = C.products(), rows = [], wins = {};
+    sel.forEach(function (x) { wins[x.id] = 0; });
+    products.forEach(function (p) {
+      p.colors.forEach(function (col) {
+        var ranked = sel.map(function (x) { return { d: x, o: bestFor(x, p, col) }; }).sort(function (a, b) { return b.o.sc.raw - a.o.sc.raw; });
+        wins[ranked[0].d.id]++;
+        rows.push({ p: p, col: col, ranked: ranked });
+      });
+    });
+
+    /* summary */
+    var sum = h('div', { class: 'verdict' },
+      h('div', null, h('div', { class: 'big' }, String(rows.length)), h('div', { class: 'tiny muted' }, 'PRODUCT COLORS')),
+      h('div', { class: 'grow' },
+        h('div', { style: { fontWeight: 600 } }, 'Best design and best print setup for every product color.'),
+        h('div', { class: 'small muted' }, sel.map(function (x) { return x.name + ' is best on ' + wins[x.id]; }).join(' · ') + ' · DTF · main design on the ' + S.dir.side)),
+      h('button', { class: 'btn pri', onclick: function () {
+        var n = 0;
+        rows.forEach(function (r) { var w = r.ranked[0]; if (w.o.sc.high) return; approve(pickVariant(w.d, r.p, r.col, w.o)); n++; });
+        if (lg && lg.an) products.forEach(function (p) { var lv = logoVariantFor(p.id, p.colors[0].id); if (lv && !vstatus(lv).high && !vstatus(lv).approved) approve(lv); });
+        toast(n + ' best picks approved'); go('best');
+      } }, 'Approve all best picks'),
+      h('button', { class: 'btn', onclick: function () { S.exp.design = 'all'; go('export'); } }, 'Export →'));
+    var lg = designById(S.logoId);
+    page.appendChild(sum);
+
+    page.appendChild(h('div', { class: 'ctrl' },
+      grp('Designs to compare', h('div', { class: 'chips' }, designs.map(function (x) {
+        var on = sel.indexOf(x) >= 0;
+        return chip(x.name, on, function () {
+          var cur = sel.map(function (y) { return y.id; });
+          if (on && cur.length > 1) cur.splice(cur.indexOf(x.id), 1); else if (!on) cur.push(x.id);
+          S.best.only = cur; go('best');
+        });
+      }))),
+      grp('Main design on', h('div', { class: 'chips' },
+        chip('Back', S.dir.side === 'back', function () { S.dir.side = 'back'; go('best'); }),
+        chip('Front', S.dir.side === 'front', function () { S.dir.side = 'front'; go('best'); })))));
+
+    page.appendChild(h('div', { class: 'tiny muted', style: { margin: '-4px 0 12px' } },
+      'For each color the app tries every design × every allowed print box × every treatment, applies the safe fixes, and scores them: problems/warnings (50), contrast on that fabric color (25), sharpness at that size (15), print presence (10). Highest score wins.'));
+
+    products.forEach(function (p) {
+      var list = rows.filter(function (r) { return r.p.id === p.id; });
+      var tally = {}; list.forEach(function (r) { tally[r.ranked[0].d.name] = (tally[r.ranked[0].d.name] || 0) + 1; });
+      page.appendChild(h('div', { class: 'prow' },
+        h('div', { class: 'pname' }, h('h3', null, p.name), h('p', null, 'Boxes: ' + p.boxes.join(' / ') + ' cm'),
+          h('p', null, Object.keys(tally).map(function (k) { return k + ' ×' + tally[k]; }).join(' · '))),
+        h('div', { class: 'bcards' }, list.map(function (r) { return bestCard(r); }))));
+    });
+  }
+
+  function bestCard(r) {
+    var win = r.ranked[0], p = r.p, col = r.col;
+    var reasons = bestReasons(win, r.ranked[1], col);
+    var v0 = getVariant(win.d.id, p.id, col.id, 'main', win.o.boxCm, 'dtf');
+    var approved = v0 && v0.approved && vstatus(v0).approved && v0.approved.wCm === win.o.wCm && v0.approved.settings.treatment === win.o.settings.treatment;
+    var thumbs = h('div', { class: 'bthumbs' });
+    r.ranked.forEach(function (x, i) {
+      var cv = U.canvas(10, 10), sc = x.o.sc;
+      var probs = sc.high ? sc.high + ' problem' + (sc.high > 1 ? 's' : '') : sc.mid ? sc.mid + ' warning' + (sc.mid > 1 ? 's' : '') : 'no warnings';
+      var t = h('button', { class: 'bth' + (i === 0 ? ' win' : ''), type: 'button', title: 'Open ' + x.d.name + ' in Print Lab', onclick: function () { var v = pickVariant(x.d, p, col, x.o); persist(v); openLab(v.id); } },
+        h('div', { class: 'bimg' }, cv, h('div', { class: 'ld' }, h('div', { class: 'spin' })), i === 0 ? h('b', { class: 'badge' }, 'BEST') : null),
+        h('div', { class: 'bmeta' },
+          h('div', { class: 'bn' }, x.d.name, h('span', { class: 'st ' + scoreClass(sc.total) }, sc.total)),
+          h('div', { class: 'tiny' }, x.o.label + ' · ' + x.o.boxCm + ' cm box'),
+          h('div', { class: 'tiny mono muted' }, fmtSize(x.o) + ' · ' + probs)));
+      thumbs.appendChild(t);
+      enqueue(function () {
+        var lv = logoVariantFor(p.id, col.id);
+        var mv = { designId: x.d.id, productId: p.id, colorId: col.id, kind: 'main', method: 'dtf', wCm: x.o.wCm, hCm: x.o.hCm, offset: { dx: 0, dy: 0 }, settings: x.o.settings };
+        return composeVariant(mv, lv, p.id, col.id).then(function (full) {
+          var out = cropTo(full, RD.viewCrop(p, S.dir.side, true), 160);
+          cv.width = out.width; cv.height = out.height; U.ctx2d(cv).drawImage(out, 0, 0);
+          var l = t.querySelector('.ld'); if (l) l.remove();
+        }).catch(function () { var l = t.querySelector('.ld'); if (l) l.textContent = 'Mockup missing'; });
+      });
+    });
+    return h('div', { class: 'vcard bcard' },
+      h('div', { class: 'meta' }, h('div', { class: 't' }, h('i', { style: { background: col.hex } }), col.name)),
+      thumbs,
+      h('div', { class: 'meta' },
+        h('div', { class: 'tr' }, h('b', null, 'Best: ' + win.d.name), ' — ' + win.o.label + ', ' + fmtSize(win.o) + ' in the ' + win.o.boxCm + ' cm box' + (win.o.settings.knockout ? ', knockout on' : '') + '.'),
+        h('div', { class: 'tiny muted' }, 'Why: ' + reasons.join('; ') + '.'),
+        win.o.sc.high ? h('div', { class: 'tiny', style: { color: 'var(--high)' } }, win.o.sc.w.filter(function (w) { return w.sev === 'high'; }).map(function (w) { return w.title; }).join(' · ')) : null),
+      h('div', { class: 'acts' },
+        approved ? h('span', { class: 'st ok', style: { flex: 1, justifyContent: 'center' } }, '✓ Approved')
+          : h('button', { class: 'btn sm pri', onclick: function () { approve(pickVariant(win.d, p, col, win.o)); toast('Approved ' + win.d.name + ' on ' + col.name + ' ' + p.name); go('best'); } }, 'Approve best'),
+        h('button', { class: 'btn sm', onclick: function () { var v = pickVariant(win.d, p, col, win.o); persist(v); openLab(v.id); } }, 'Fine-tune')));
   }
 
   /* ================= VIEWPORT (zoom / pan / split / true-resolution detail) ================= */
@@ -2557,22 +2753,21 @@ PD.guide = (function () {
     var bytes = U.pngWithDpi(await U.blobToBytes(blob), dpi);
     return { bytes: bytes, w: c.width, h: c.height, hash: U.fnv(bytes) };
   }
+  /* Files are named the way you talk about them: "Regular T-shirt Black - Keep It Real - 19.2x30cm - Back.png" */
+  function cleanName(x) { return String(x).replace(/[™®]/g, '').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim(); }
   function fileName(group) {
-    var v = group[0].v, d = designById(v.designId);
-    var prodIds = Array.from(new Set(group.map(function (g) { return g.v.productId; })));
-    var colIds = Array.from(new Set(group.map(function (g) { return g.v.colorId; })));
-    var colorPart = colIds.map(function (c) { return U.slug(C.color(group[0].v.productId, c) ? C.color(group[0].v.productId, c).name : c); }).join('+');
-    var all = C.products(), withColor = v.kind === 'logo' ? all : all.filter(function (p) { return p.colors.some(function (c) { return colIds.indexOf(c.id) >= 0; }); });
-    function covers(list) { return list.length && list.every(function (p) { return prodIds.indexOf(p.id) >= 0; }); }
-    var adults = withColor.filter(function (p) { return !p.kids; }), kids = withColor.filter(function (p) { return p.kids; });
-    var prodPart;
-    if (prodIds.length > 1 && prodIds.length === withColor.length) prodPart = 'ALL-PRODUCTS';
-    else if (prodIds.length === adults.length && covers(adults) && adults.length > 1) prodPart = 'ALL-ADULT';
-    else if (prodIds.length === kids.length && covers(kids) && kids.length > 1) prodPart = 'ALL-KIDS';
-    else prodPart = prodIds.map(function (id) { return C.product(id).short; }).join('+');
-    var side = v.kind === 'logo' ? (S.dir.side === 'back' ? 'FRONT-LEFT-CHEST' : 'BACK-UNDER-COLLAR') : S.dir.side.toUpperCase();
-    var snap = group[0].snap;
-    var name = ['TEMPORARY', v.kind === 'logo' ? 'LOGO' : U.slug(d.name), U.fmtCm(snap.wCm) + 'x' + U.fmtCm(snap.hCm) + 'cm', v.kind === 'logo' ? null : colorPart, prodPart, v.method === 'emb' ? 'EMBROIDERY-REF' : 'DTF', side].filter(Boolean).join('_');
+    var v = group[0].v, d = designById(v.designId), snap = group[0].snap;
+    var pairs = [];
+    group.forEach(function (g) {
+      var p = C.product(g.v.productId), c = C.color(g.v.productId, g.v.colorId);
+      var n = g.v.kind === 'logo' ? p.name : p.name + ' ' + (c ? c.name : g.v.colorId);
+      if (pairs.indexOf(n) < 0) pairs.push(n);
+    });
+    var who = pairs.length > 3 ? pairs.slice(0, 3).join(' + ') + ' +' + (pairs.length - 3) + ' more' : pairs.join(' + ');
+    var place = v.kind === 'logo' ? (S.dir.side === 'back' ? 'Front Left Chest' : 'Back Under Collar') : (S.dir.side === 'back' ? 'Back' : 'Front');
+    var parts = [who, v.kind === 'logo' ? 'Logo' : d.name, U.fmtCm(snap.wCm) + 'x' + U.fmtCm(snap.hCm) + 'cm', place];
+    if (v.method === 'emb') parts.push('Embroidery Reference');
+    var name = parts.map(cleanName).join(' - ');
     if (name.length > 180) name = name.slice(0, 180);
     return name + '.png';
   }
@@ -2597,8 +2792,10 @@ PD.guide = (function () {
     }
     var page = h('div', { class: 'page' }); root.appendChild(page);
     page.appendChild(h('div', { class: 'row', style: { marginBottom: '6px' } }, h('h1', null, 'Export'), h('span', { class: 'sp' })));
-    page.appendChild(h('p', { class: 'muted small' }, 'Transparent PNGs at exact print size for your vendor. Identical files are merged, and each file name lists size, color, products, method and placement.'));
+    page.appendChild(h('p', { class: 'muted small' }, 'Transparent PNGs at exact print size for your vendor. One file per product and color, named like "Regular T-shirt Black - Keep It Real - 19.2x30cm - Back.png". Turn on "Merge identical" to get fewer files.'));
     var list = exportCandidates();
+    var pOrder = C.products().map(function (p) { return p.id; });
+    list.sort(function (a, b) { return (pOrder.indexOf(a.v.productId) - pOrder.indexOf(b.v.productId)) || (a.v.kind === 'logo') - (b.v.kind === 'logo') || String(a.v.colorId).localeCompare(b.v.colorId) || String(a.v.designId).localeCompare(b.v.designId); });
     var opts = h('div', { class: 'ctrl' },
       grp('Designs', h('div', { class: 'chips' }, chip('Current design', S.exp.design === 'current', function () { S.exp.design = 'current'; go('export'); }), chip('All designs', S.exp.design === 'all', function () { S.exp.design = 'all'; go('export'); }))),
       grp('Include', h('div', { class: 'chips' }, chip('Approved only', !S.exp.drafts, function () { S.exp.drafts = false; go('export'); }),
@@ -2840,7 +3037,7 @@ PD.guide = (function () {
     if (!designById(S.designId)) { var first = S.designs.filter(function (d) { return d.type === 'design'; })[0]; S.designId = first ? first.id : null; }
     if (!designById(S.logoId)) { var fl = S.designs.filter(function (d) { return d.type === 'logo'; })[0]; S.logoId = fl ? fl.id : ''; }
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () { });
-    go('director');
+    go('best');
   }
   window.addEventListener('error', function (e) { console.error(e.error || e.message); });
   PD.app = { S: S, go: go, getVariant: getVariant, variantFromId: variantFromId, renderPng: renderPng, designById: designById, loadDesign: loadDesign };
