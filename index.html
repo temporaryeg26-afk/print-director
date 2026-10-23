@@ -117,19 +117,29 @@ label{cursor:pointer}
 .vcard .meta .sz{font-family:var(--mono);color:var(--mu);font-size:11px}
 .vcard .acts{display:flex;gap:6px;padding:0 10px 10px}
 .vcard .acts .btn{flex:1}
-.bcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.bthumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;padding:0 10px}
-.bth{background:var(--p2);border:1px solid var(--line);border-radius:8px;padding:0;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column}
-.bth.win{border-color:var(--ok);opacity:1;box-shadow:0 0 0 1px var(--ok)}
-.bth:not(.win) .bmeta{opacity:.75}
-.bth .bimg{position:relative;aspect-ratio:4/4.3;background:#1A1A1A}
-.bth .bimg canvas{width:100%;height:100%;display:block}
-.bth .bimg .ld{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mu)}
-.bth .badge{position:absolute;top:6px;left:6px;background:var(--ok);color:#0B0B0B;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px}
-.bth .bmeta{padding:6px 7px;display:flex;flex-direction:column;gap:3px}
-.bth .bn{display:flex;justify-content:space-between;align-items:center;gap:6px;font-weight:600;font-size:12px}
-.bcard .tr b{color:var(--tx)}
-@media (max-width:900px){.bcards{grid-template-columns:1fr}}
+.brow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.bcol{display:flex;flex-direction:column;gap:4px;padding-top:4px}
+.bcol i{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1px #555}
+.bslots{display:grid;gap:8px}
+.bslot{background:var(--p1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.bslot.star{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+.bslot.na{opacity:.7}
+.bsh{font:600 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;padding:7px 9px;border-bottom:1px solid var(--line);color:var(--tx2)}
+.bslot .bimg{position:relative;aspect-ratio:4/4.3;background:#1A1A1A;border:0;padding:0;cursor:zoom-in;display:block;width:100%}
+.bslot .bimg canvas{width:100%;height:100%;display:block}
+.bslot .bimg .ld{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mu)}
+.bslot .badge{position:absolute;top:6px;left:6px;background:var(--ok);color:#0B0B0B;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px}
+.bslot .bm{padding:8px 9px;display:flex;flex-direction:column;gap:4px;font-size:12px}
+.bslot .bn{display:flex;justify-content:space-between;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.bslot .acts{display:flex;gap:6px;padding:0 9px 9px;margin-top:auto}
+.bslot .acts .btn{flex:1}
+.bothers{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.bother{display:inline-flex;gap:5px;align-items:center;background:var(--p2);border:1px solid var(--line);border-radius:999px;padding:2px 3px 2px 8px;font-size:11px;cursor:pointer}
+.baudit summary{cursor:pointer;color:var(--tx2);font-size:11px}
+.baudit ul{margin:4px 0 0;padding-left:16px;font-size:11px;color:var(--tx2)}
+.sev-high{color:var(--high)} .sev-mid{color:var(--warn)} .sev-ok{color:var(--ok)}
+.howscore{margin:-4px 0 6px} .howscore summary{cursor:pointer;font-size:12px;color:var(--tx2)}
+@media (max-width:900px){.brow{grid-template-columns:1fr}.bcol{flex-direction:row;align-items:center}.bslots{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 .section-title{display:flex;align-items:center;gap:10px;margin:26px 0 8px}
 
 /* print lab */
@@ -1631,7 +1641,7 @@ PD.guide = (function () {
   'use strict';
 
   var TABS = [
-    { tab: 'best', title: 'Best Picks', text: 'Start here. Checks every design on every product and every color, tries every print box and treatment, and shows the winning design with its best setup for each color, with the reason. Approve one card or all of them at once, then Export.' },
+    { tab: 'best', title: 'Best Picks', text: 'Start here. Audits every design on every product and color in four setups — 20 cm back, 20 cm front, 30 cm back, 30 cm front — and shows the winning design with its best treatment for each, the score, the reason and a full audit. ★ marks the strongest setup per color. Approve one card or all of them at once, then Export.' },
     { tab: 'director', title: 'Director', text: 'Pick or upload a design. It is analyzed once, then the Director builds the best version for every product and every color it comes in: size, placement, dots, ink and logo. Approve what you like and download.' },
     { tab: 'lab', title: 'Print Lab', text: 'Open any product/color to fine-tune it by hand: size, dots, pattern, angle, contrast, knockout, clean edges, embroidery. Original vs processed with split view, zoom and pan. Warnings come with Fix buttons.' },
     { tab: 'compare', title: 'Compare', text: 'Put up to four treatments side by side with synchronized zoom, as artwork or on the garment. Promote the winner to the Print Lab.' },
@@ -1700,7 +1710,7 @@ PD.guide = (function () {
   var h = U.h, $ = U.$;
 
   var S = {
-    tab: 'best', best: { only: null }, designs: [], designId: 'keep-it-real', logoId: 'front-logo', logoMethod: 'emb',
+    tab: 'best', best: { only: null, boxes: [20, 30], sides: ['back', 'front'] }, designs: [], designId: 'keep-it-real', logoId: 'front-logo', logoMethod: 'emb',
     variants: {}, tests: [], assetsOk: false,
     dir: { box: 'rec', side: 'back', method: 'dtf' },
     lab: { vid: null, view: 'split', bg: 'garment', mockView: null, undo: [], redo: [], locked: false, stitch: true, showWhy: false },
@@ -1743,7 +1753,8 @@ PD.guide = (function () {
   }
 
   /* ================= variants ================= */
-  function vkey(designId, productId, colorId, kind, box, method) { return [designId, productId, colorId, kind, kind === 'logo' ? 0 : box, method].join('|'); }
+  function vkey(designId, productId, colorId, kind, box, method, side) { return [designId, productId, colorId, kind, kind === 'logo' ? 0 : box, method].join('|') + (kind === 'main' && side === 'front' ? '|front' : ''); }
+  function sideOf(v) { return v.kind === 'logo' ? (S.dir.side === 'back' ? 'front' : 'back') : (v.side || S.dir.side); }
   function boxFor(p) {
     if (S.dir.box === 'rec') return R.recommendBox(p);
     var b = +S.dir.box;
@@ -1752,23 +1763,25 @@ PD.guide = (function () {
   function ctxFor(d, p, col, kind, box, method) {
     return { an: d.an, product: p, color: col, kind: kind, boxCm: box, method: method, tests: S.tests, designId: d.id };
   }
-  function getVariant(designId, productId, colorId, kind, box, method) {
+  function getVariant(designId, productId, colorId, kind, box, method, side) {
+    side = kind === 'main' ? (side || S.dir.side) : null;
     var d = designById(designId), p = C.product(productId), col = C.color(productId, colorId);
     if (!d || !d.an || !p || !col) return null;
-    var id = vkey(designId, productId, colorId, kind, box, method), v = S.variants[id];
+    var id = vkey(designId, productId, colorId, kind, box, method, side), v = S.variants[id];
     var ctx = ctxFor(d, p, col, kind, box, method), rec = R.recommend(ctx);
     if (!v) {
       v = S.variants[id] = { id: id, designId: designId, productId: productId, colorId: colorId, kind: kind, boxCm: kind === 'logo' ? 0 : box, method: method,
-        wCm: rec.size.wCm, hCm: rec.size.hCm, offset: { dx: 0, dy: 0 }, settings: rec.settings, approved: null, userEdited: false, exportedAt: null };
+        wCm: rec.size.wCm, hCm: rec.size.hCm, offset: { dx: 0, dy: 0 }, settings: rec.settings, approved: null, userEdited: false, exportedAt: null, side: side };
     } else if (!v.userEdited && !v.approved) {
       v.wCm = rec.size.wCm; v.hCm = rec.size.hCm; v.settings = rec.settings;
     }
+    if (kind === 'main') v.side = side;
     v._rec = rec; v._ctx = ctx;
     return v;
   }
   function variantFromId(id) {
     var a = id.split('|');
-    return getVariant(a[0], a[1], a[2], a[3], +a[4], a[5]);
+    return getVariant(a[0], a[1], a[2], a[3], +a[4], a[5], a[6] === 'front' ? 'front' : 'back');
   }
   function vhash(o) { return U.hashString(U.stableStringify({ s: P.withDefaults(o.settings), w: o.wCm, h: o.hCm, o: o.offset || { dx: 0, dy: 0 }, m: o.method })); }
   function vstatus(v) {
@@ -1831,7 +1844,7 @@ PD.guide = (function () {
   /* full mockup composite with the main design and the logo on their sides */
   function composeVariant(mainV, logoV, productId, colorId) {
     var p = C.product(productId), layers = [];
-    var mainSide = S.dir.side, logoSide = mainSide === 'back' ? 'front' : 'back';
+    var mainSide = mainV && mainV.side ? mainV.side : S.dir.side, logoSide = mainSide === 'back' ? 'front' : 'back';
     [[mainV, 'main', mainSide], [logoV, 'logo', logoSide]].forEach(function (x) {
       var v = x[0]; if (!v) return;
       var r = RD.placement(p, x[2], x[1], v.wCm, v.hCm, v.offset);
@@ -2088,9 +2101,12 @@ PD.guide = (function () {
   }
 
   /* ================= BEST PICKS =================
-   * For every product and color: try every design, every allowed print box and every
-   * treatment the rules consider, apply the safe automatic fixes, score each option
-   * and keep the best. Then rank the designs against each other for that color. */
+   * The audit. For every product and color, and for every setup (20 / 30 cm box × back / front):
+   * try every design × every treatment the rules consider (and a pocket-safe size on hoodie fronts),
+   * apply the safe automatic fixes, score each option and keep the best. Designs are then ranked
+   * against each other per setup, and the strongest setup per color is starred. */
+  var SLOTS = [{ box: 20, side: 'back' }, { box: 20, side: 'front' }, { box: 30, side: 'back' }, { box: 30, side: 'front' }];
+  function slotName(sl) { return sl.box + ' cm · ' + (sl.side === 'back' ? 'Back' : 'Front'); }
   function contrastOn(an, hex) {
     var g = U.hexToRgb(hex), gl = U.rgbToLab(g[0], g[1], g[2]), tot = 0, sum = 0;
     an.palette.forEach(function (p) {
@@ -2098,6 +2114,15 @@ PD.guide = (function () {
       sum += p.share * Math.min(d, 60) / 60; tot += p.share;
     });
     return tot ? sum / tot : 0;
+  }
+  /* Hoodie fronts have a kangaroo pocket: a tall print runs into it. Estimate, from typical patterns. */
+  function pocketLimit(p) { return p.kind === 'hoodie' ? (p.kids ? 17 : 26) : null; }
+  function slotWarnings(ctx, o, p, side) {
+    var w = R.warnings(ctx, o).slice();
+    var lim = pocketLimit(p);
+    if (side === 'front' && lim && o.hCm > lim + 0.05) w.push({ id: 'W-POCKET', sev: 'mid', title: 'Runs into the front pocket', body: 'On a hoodie front, prints taller than about ' + lim + ' cm reach the kangaroo pocket (estimate).', fixes: [] });
+    if (side === 'front' && !p.kids && Math.max(o.wCm, o.hCm) > 28) w.push({ id: 'W-FRONT-BIG', sev: 'info', title: 'Very large front print', body: 'A full 30 cm front print is bold; most premium fronts sit at 20–28 cm.', fixes: [] });
+    return w;
   }
   function autoFix(o, ctx) {
     for (var pass = 0; pass < 3; pass++) {
@@ -2111,30 +2136,32 @@ PD.guide = (function () {
     }
     return o;
   }
-  function scoreOption(d, p, col, o, ctx, t) {
-    var w = R.warnings(ctx, o);
+  function scoreOption(d, p, col, o, ctx, t, side) {
+    var w = slotWarnings(ctx, o, p, side);
     var high = w.filter(function (x) { return x.sev === 'high'; }).length, mid = w.filter(function (x) { return x.sev === 'mid'; }).length, info = w.length - high - mid;
     var quality = Math.max(0, 50 - 25 * high - 8 * mid - 2 * info);
     var contrast = contrastOn(d.an, col.hex), s = o.settings;
     var dots = s.treatment === 'halftone' || s.treatment === 'selective';
     var dpi = AN.dpiAt(d.an, o.wCm);
     var sharp = dots ? (s.treatment === 'halftone' ? 1 : 0.85 + 0.15 * Math.min(dpi / t.targetDpi, 1)) : Math.min(dpi / t.targetDpi, 1);
-    var long = Math.max(o.wCm, o.hCm), presence = Math.min(long / 30, 1);
-    var total = quality + 25 * contrast + 15 * sharp + 10 * presence;
-    return { total: Math.round(total), raw: total + (o.isRec ? 0.6 : 0), high: high, mid: mid, info: info, w: w, contrast: contrast, dpi: dpi, sharp: sharp };
+    var fill = Math.max(o.wCm, o.hCm) / o.boxCm; /* how well it uses the chosen box */
+    var total = quality + 25 * contrast + 15 * sharp + 10 * Math.min(fill, 1);
+    return { total: Math.round(total), raw: total + (o.isRec ? 0.6 : 0), high: high, mid: mid, info: info, w: w, contrast: contrast, dpi: dpi, sharp: sharp, fill: fill };
   }
-  function bestFor(d, p, col) {
+  function bestFor(d, p, col, box, side) {
     var t = R.T(), opts = [];
-    p.boxes.forEach(function (box) {
-      var ctx = ctxFor(d, p, col, 'main', box, 'dtf'), rec = R.recommend(ctx);
-      var list = [{ label: rec.name, settings: U.deepCopy(rec.settings), isRec: true }];
-      rec.alts.forEach(function (a) { if (a.patch && a.patch.settings) list.push({ label: a.label, settings: Object.assign(U.deepCopy(rec.settings), a.patch.settings), isRec: false }); });
+    var ctx = ctxFor(d, p, col, 'main', box, 'dtf'), rec = R.recommend(ctx);
+    var sizes = [{ wCm: rec.size.wCm, hCm: rec.size.hCm, note: '' }];
+    var lim = pocketLimit(p);
+    if (side === 'front' && lim && rec.size.hCm > lim) sizes.push({ wCm: U.round(lim * d.an.aspect, 1), hCm: lim, note: 'pocket-safe' });
+    var list = [{ settings: U.deepCopy(rec.settings), isRec: true }];
+    rec.alts.forEach(function (a) { if (a.patch && a.patch.settings) list.push({ settings: Object.assign(U.deepCopy(rec.settings), a.patch.settings), isRec: false }); });
+    sizes.forEach(function (sz) {
       list.forEach(function (x) {
-        var o = { kind: 'main', method: 'dtf', boxCm: box, wCm: rec.size.wCm, hCm: rec.size.hCm, offset: { dx: 0, dy: 0 }, settings: x.settings, isRec: x.isRec };
+        var o = { kind: 'main', method: 'dtf', boxCm: box, side: side, wCm: sz.wCm, hCm: sz.hCm, sizeNote: sz.note, offset: { dx: 0, dy: 0 }, settings: U.deepCopy(x.settings), isRec: x.isRec && !sz.note };
         autoFix(o, ctx);
         o.label = treatName(o.settings, 'dtf');
-        o.sc = scoreOption(d, p, col, o, ctx, t);
-        o.ctx = ctx;
+        o.sc = scoreOption(d, p, col, o, ctx, t, side);
         opts.push(o);
       });
     });
@@ -2143,31 +2170,46 @@ PD.guide = (function () {
   }
   function bestReasons(win, lose, col) {
     var r = [];
-    if (!lose) return r;
+    if (!lose) return ['only design selected'];
     var a = win.o.sc, b = lose.o.sc;
     if (a.contrast - b.contrast > 0.06) r.push('stands out more on ' + col.name + ' (' + pct(a.contrast) + ' vs ' + pct(b.contrast) + ' contrast)');
     if (a.high < b.high) r.push(lose.d.name + ' has a problem here');
-    else if (a.mid < b.mid) r.push('fewer warnings');
+    else if (a.mid < b.mid) r.push('fewer warnings than ' + lose.d.name);
     if (a.sharp - b.sharp > 0.08) r.push('prints sharper at this size');
-    if (!r.length) r.push(Math.abs(a.total - b.total) <= 3 ? 'both work well — near tie' : 'better overall balance');
+    if (!r.length) r.push(Math.abs(a.total - b.total) <= 3 ? 'near tie — both work' : 'better overall balance');
     return r;
   }
   function pickVariant(d, p, col, o) {
-    var v = getVariant(d.id, p.id, col.id, 'main', o.boxCm, 'dtf');
-    v.settings = U.deepCopy(o.settings); v.wCm = o.wCm; v.hCm = o.hCm; v.offset = { dx: 0, dy: 0 }; v.userEdited = true;
+    var v = getVariant(d.id, p.id, col.id, 'main', o.boxCm, 'dtf', o.side);
+    v.settings = U.deepCopy(o.settings); v.wCm = o.wCm; v.hCm = o.hCm; v.offset = { dx: 0, dy: 0 }; v.userEdited = true; v.side = o.side;
     return v;
   }
+  function isApprovedPick(d, p, col, o) {
+    var v = S.variants[vkey(d.id, p.id, col.id, 'main', o.boxCm, 'dtf', o.side)];
+    return !!(v && v.approved && v.approved.wCm === o.wCm && v.approved.hCm === o.hCm && v.approved.settings.treatment === o.settings.treatment);
+  }
   function scoreClass(n) { return n >= 80 ? 'ok' : n >= 60 ? 'warn' : 'high'; }
+
+  /* thumbnails render only when scrolled into view */
+  var bestIO = null;
+  function lazyRender(el, fn) {
+    if (!('IntersectionObserver' in window)) { enqueue(fn); return; }
+    if (!bestIO) bestIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { bestIO.unobserve(e.target); var f = e.target._render; e.target._render = null; if (f) enqueue(f); } });
+    }, { rootMargin: '400px' });
+    el._render = fn; bestIO.observe(el);
+  }
 
   function viewBest(root) {
     var page = h('div', { class: 'page' });
     root.appendChild(page);
     var designs = S.designs.filter(function (x) { return x.type === 'design'; });
-    page.appendChild(spinner('Checking ' + designs.length + ' designs on every product and color…'));
+    page.appendChild(spinner('Auditing ' + designs.length + ' designs on every product, color, size and side…'));
     var lg = designById(S.logoId);
     Promise.all(designs.map(function (x) { return loadDesign(x).catch(function () { return null; }); }).concat([lg ? loadDesign(lg).catch(function () { return null; }) : null])).then(function () {
       if (S.tab !== 'best') return;
       U.clear(page);
+      if (bestIO) { bestIO.disconnect(); bestIO = null; }
       buildBest(page, designs.filter(function (x) { return x.an; }));
     });
   }
@@ -2176,34 +2218,41 @@ PD.guide = (function () {
     if (!designs.length) { page.appendChild(h('p', { class: 'muted' }, 'No designs found. Upload one in Director.')); return; }
     var sel = S.best.only ? designs.filter(function (x) { return S.best.only.indexOf(x.id) >= 0; }) : designs;
     if (!sel.length) sel = designs;
-    var products = C.products(), rows = [], wins = {};
+    var slots = SLOTS.filter(function (sl) { return S.best.boxes.indexOf(sl.box) >= 0 && S.best.sides.indexOf(sl.side) >= 0; });
+    var products = C.products(), rows = [], wins = {}, picks = 0, blocked = 0;
     sel.forEach(function (x) { wins[x.id] = 0; });
     products.forEach(function (p) {
       p.colors.forEach(function (col) {
-        var ranked = sel.map(function (x) { return { d: x, o: bestFor(x, p, col) }; }).sort(function (a, b) { return b.o.sc.raw - a.o.sc.raw; });
-        wins[ranked[0].d.id]++;
-        rows.push({ p: p, col: col, ranked: ranked });
+        var cells = slots.map(function (sl) {
+          if (p.boxes.indexOf(sl.box) < 0) return { sl: sl, na: true };
+          var ranked = sel.map(function (x) { return { d: x, o: bestFor(x, p, col, sl.box, sl.side) }; }).sort(function (a, b) { return b.o.sc.raw - a.o.sc.raw; });
+          wins[ranked[0].d.id]++; picks++; if (ranked[0].o.sc.high) blocked++;
+          return { sl: sl, ranked: ranked };
+        });
+        var live = cells.filter(function (c) { return !c.na; });
+        var top = live.slice().sort(function (a, b) { return b.ranked[0].o.sc.raw - a.ranked[0].o.sc.raw; })[0];
+        if (top) top.top = true;
+        rows.push({ p: p, col: col, cells: cells });
       });
     });
+    var lg = designById(S.logoId);
 
-    /* summary */
-    var sum = h('div', { class: 'verdict' },
-      h('div', null, h('div', { class: 'big' }, String(rows.length)), h('div', { class: 'tiny muted' }, 'PRODUCT COLORS')),
+    page.appendChild(h('div', { class: 'verdict' },
+      h('div', null, h('div', { class: 'big' }, String(picks)), h('div', { class: 'tiny muted' }, 'BEST PICKS')),
       h('div', { class: 'grow' },
-        h('div', { style: { fontWeight: 600 } }, 'Best design and best print setup for every product color.'),
-        h('div', { class: 'small muted' }, sel.map(function (x) { return x.name + ' is best on ' + wins[x.id]; }).join(' · ') + ' · DTF · main design on the ' + S.dir.side)),
+        h('div', { style: { fontWeight: 600 } }, 'Best design for every product, color, size and side — ' + rows.length + ' colors × ' + slots.length + ' setup' + (slots.length > 1 ? 's' : '') + '.'),
+        h('div', { class: 'small muted' }, sel.map(function (x) { return x.name + ' wins ' + wins[x.id]; }).join(' · ') + (blocked ? ' · ' + blocked + ' with a problem to look at' : ' · no blocking problems') + ' · DTF')),
       h('button', { class: 'btn pri', onclick: function () {
         var n = 0;
-        rows.forEach(function (r) { var w = r.ranked[0]; if (w.o.sc.high) return; approve(pickVariant(w.d, r.p, r.col, w.o)); n++; });
+        rows.forEach(function (r) { r.cells.forEach(function (c) { if (c.na) return; var w = c.ranked[0]; if (w.o.sc.high) return; approve(pickVariant(w.d, r.p, r.col, w.o)); n++; }); });
         if (lg && lg.an) products.forEach(function (p) { var lv = logoVariantFor(p.id, p.colors[0].id); if (lv && !vstatus(lv).high && !vstatus(lv).approved) approve(lv); });
         toast(n + ' best picks approved'); go('best');
-      } }, 'Approve all best picks'),
-      h('button', { class: 'btn', onclick: function () { S.exp.design = 'all'; go('export'); } }, 'Export →'));
-    var lg = designById(S.logoId);
-    page.appendChild(sum);
+      } }, 'Approve all shown'),
+      h('button', { class: 'btn', onclick: function () { S.exp.design = 'all'; go('export'); } }, 'Export →')));
 
+    function toggle(arr, val) { var i = arr.indexOf(val); if (i >= 0) { if (arr.length > 1) arr.splice(i, 1); } else arr.push(val); go('best'); }
     page.appendChild(h('div', { class: 'ctrl' },
-      grp('Designs to compare', h('div', { class: 'chips' }, designs.map(function (x) {
+      grp('Designs', h('div', { class: 'chips' }, designs.map(function (x) {
         var on = sel.indexOf(x) >= 0;
         return chip(x.name, on, function () {
           var cur = sel.map(function (y) { return y.id; });
@@ -2211,60 +2260,80 @@ PD.guide = (function () {
           S.best.only = cur; go('best');
         });
       }))),
-      grp('Main design on', h('div', { class: 'chips' },
-        chip('Back', S.dir.side === 'back', function () { S.dir.side = 'back'; go('best'); }),
-        chip('Front', S.dir.side === 'front', function () { S.dir.side = 'front'; go('best'); })))));
+      grp('Print box', h('div', { class: 'chips' },
+        chip('20 × 20 cm', S.best.boxes.indexOf(20) >= 0, function () { toggle(S.best.boxes, 20); }),
+        chip('30 × 30 cm', S.best.boxes.indexOf(30) >= 0, function () { toggle(S.best.boxes, 30); }))),
+      grp('Side', h('div', { class: 'chips' },
+        chip('Back', S.best.sides.indexOf('back') >= 0, function () { toggle(S.best.sides, 'back'); }),
+        chip('Front', S.best.sides.indexOf('front') >= 0, function () { toggle(S.best.sides, 'front'); })))));
 
-    page.appendChild(h('div', { class: 'tiny muted', style: { margin: '-4px 0 12px' } },
-      'For each color the app tries every design × every allowed print box × every treatment, applies the safe fixes, and scores them: problems/warnings (50), contrast on that fabric color (25), sharpness at that size (15), print presence (10). Highest score wins.'));
+    page.appendChild(h('details', { class: 'howscore' }, h('summary', null, 'How the audit decides'),
+      h('div', { class: 'tiny muted' },
+        'For each setup it tries every selected design, every treatment the rules allow (clean solid, selective halftone, full halftone), and a pocket-safe size on hoodie fronts. Safe fixes (knockout, clean edges, dot limits) are applied automatically. Each option is scored out of 100: ',
+        h('b', null, 'problems & warnings 50'), ' · ', h('b', null, 'contrast on that fabric color 25'), ' · ', h('b', null, 'sharpness at that size 15'), ' · ', h('b', null, 'how well it fills the box 10'),
+        '. The highest score wins the setup; ★ marks the strongest setup for that color. Chest widths and pocket heights are estimates — edit them in Rules & Knowledge.')));
 
     products.forEach(function (p) {
       var list = rows.filter(function (r) { return r.p.id === p.id; });
-      var tally = {}; list.forEach(function (r) { tally[r.ranked[0].d.name] = (tally[r.ranked[0].d.name] || 0) + 1; });
-      page.appendChild(h('div', { class: 'prow' },
-        h('div', { class: 'pname' }, h('h3', null, p.name), h('p', null, 'Boxes: ' + p.boxes.join(' / ') + ' cm'),
-          h('p', null, Object.keys(tally).map(function (k) { return k + ' ×' + tally[k]; }).join(' · '))),
-        h('div', { class: 'bcards' }, list.map(function (r) { return bestCard(r); }))));
+      var tally = {};
+      list.forEach(function (r) { r.cells.forEach(function (c) { if (!c.na) tally[c.ranked[0].d.name] = (tally[c.ranked[0].d.name] || 0) + 1; }); });
+      page.appendChild(h('div', { class: 'section-title' }, h('h2', null, p.name), h('span', { class: 'muted small' }, 'Boxes ' + p.boxes.join(' / ') + ' cm · ' + Object.keys(tally).map(function (k) { return k + ' wins ' + tally[k]; }).join(' · '))));
+      list.forEach(function (r) { page.appendChild(bestRow(r, slots)); });
     });
   }
 
-  function bestCard(r) {
-    var win = r.ranked[0], p = r.p, col = r.col;
-    var reasons = bestReasons(win, r.ranked[1], col);
-    var v0 = getVariant(win.d.id, p.id, col.id, 'main', win.o.boxCm, 'dtf');
-    var approved = v0 && v0.approved && vstatus(v0).approved && v0.approved.wCm === win.o.wCm && v0.approved.settings.treatment === win.o.settings.treatment;
-    var thumbs = h('div', { class: 'bthumbs' });
-    r.ranked.forEach(function (x, i) {
-      var cv = U.canvas(10, 10), sc = x.o.sc;
-      var probs = sc.high ? sc.high + ' problem' + (sc.high > 1 ? 's' : '') : sc.mid ? sc.mid + ' warning' + (sc.mid > 1 ? 's' : '') : 'no warnings';
-      var t = h('button', { class: 'bth' + (i === 0 ? ' win' : ''), type: 'button', title: 'Open ' + x.d.name + ' in Print Lab', onclick: function () { var v = pickVariant(x.d, p, col, x.o); persist(v); openLab(v.id); } },
-        h('div', { class: 'bimg' }, cv, h('div', { class: 'ld' }, h('div', { class: 'spin' })), i === 0 ? h('b', { class: 'badge' }, 'BEST') : null),
-        h('div', { class: 'bmeta' },
-          h('div', { class: 'bn' }, x.d.name, h('span', { class: 'st ' + scoreClass(sc.total) }, sc.total)),
-          h('div', { class: 'tiny' }, x.o.label + ' · ' + x.o.boxCm + ' cm box'),
-          h('div', { class: 'tiny mono muted' }, fmtSize(x.o) + ' · ' + probs)));
-      thumbs.appendChild(t);
-      enqueue(function () {
-        var lv = logoVariantFor(p.id, col.id);
-        var mv = { designId: x.d.id, productId: p.id, colorId: col.id, kind: 'main', method: 'dtf', wCm: x.o.wCm, hCm: x.o.hCm, offset: { dx: 0, dy: 0 }, settings: x.o.settings };
-        return composeVariant(mv, lv, p.id, col.id).then(function (full) {
-          var out = cropTo(full, RD.viewCrop(p, S.dir.side, true), 160);
-          cv.width = out.width; cv.height = out.height; U.ctx2d(cv).drawImage(out, 0, 0);
-          var l = t.querySelector('.ld'); if (l) l.remove();
-        }).catch(function () { var l = t.querySelector('.ld'); if (l) l.textContent = 'Mockup missing'; });
-      });
+  function bestRow(r, slots) {
+    var p = r.p, col = r.col;
+    var grid = h('div', { class: 'bslots', style: { gridTemplateColumns: 'repeat(' + slots.length + ', minmax(0,1fr))' } });
+    r.cells.forEach(function (c) { grid.appendChild(c.na ? naCell(c, p) : slotCell(c, p, col)); });
+    return h('div', { class: 'brow' },
+      h('div', { class: 'bcol' }, h('i', { style: { background: col.hex } }), h('b', null, col.name), h('span', { class: 'tiny muted mono' }, col.hex)),
+      grid);
+  }
+  function naCell(c, p) {
+    return h('div', { class: 'bslot na' }, h('div', { class: 'bsh' }, slotName(c.sl)),
+      h('div', { class: 'tiny muted', style: { padding: '14px 10px' } }, p.name + ' only takes the ' + p.boxes.join(' / ') + ' cm box (vendor limit). You can change this in Rules & Knowledge → Products.'));
+  }
+  function slotCell(c, p, col) {
+    var win = c.ranked[0], o = win.o, sc = o.sc, cv = U.canvas(10, 10);
+    var approved = isApprovedPick(win.d, p, col, o);
+    var img = h('button', { class: 'bimg', type: 'button', title: 'Fine-tune in Print Lab', onclick: function () { var v = pickVariant(win.d, p, col, o); persist(v); openLab(v.id); } },
+      cv, h('div', { class: 'ld' }, h('div', { class: 'spin' })), h('b', { class: 'badge' }, c.top ? '★ BEST' : 'BEST'));
+    lazyRender(img, function () {
+      var lv = logoVariantFor(p.id, col.id);
+      var mv = { designId: win.d.id, productId: p.id, colorId: col.id, kind: 'main', method: 'dtf', side: o.side, wCm: o.wCm, hCm: o.hCm, offset: { dx: 0, dy: 0 }, settings: o.settings };
+      return composeVariant(mv, lv, p.id, col.id).then(function (full) {
+        var out = cropTo(full, RD.viewCrop(p, o.side, true), 170);
+        cv.width = out.width; cv.height = out.height; U.ctx2d(cv).drawImage(out, 0, 0);
+        var l = img.querySelector('.ld'); if (l) l.remove();
+      }).catch(function () { var l = img.querySelector('.ld'); if (l) l.textContent = 'Mockup missing'; });
     });
-    return h('div', { class: 'vcard bcard' },
-      h('div', { class: 'meta' }, h('div', { class: 't' }, h('i', { style: { background: col.hex } }), col.name)),
-      thumbs,
-      h('div', { class: 'meta' },
-        h('div', { class: 'tr' }, h('b', null, 'Best: ' + win.d.name), ' — ' + win.o.label + ', ' + fmtSize(win.o) + ' in the ' + win.o.boxCm + ' cm box' + (win.o.settings.knockout ? ', knockout on' : '') + '.'),
-        h('div', { class: 'tiny muted' }, 'Why: ' + reasons.join('; ') + '.'),
-        win.o.sc.high ? h('div', { class: 'tiny', style: { color: 'var(--high)' } }, win.o.sc.w.filter(function (w) { return w.sev === 'high'; }).map(function (w) { return w.title; }).join(' · ')) : null),
+    var others = c.ranked.slice(1).map(function (x) {
+      return h('button', { class: 'bother', type: 'button', title: 'Open ' + x.d.name + ' for this setup', onclick: function () { var v = pickVariant(x.d, p, col, x.o); persist(v); openLab(v.id); } },
+        h('span', null, x.d.name), h('span', { class: 'st ' + scoreClass(x.o.sc.total) }, x.o.sc.total));
+    });
+    var probs = sc.w.filter(function (w) { return w.sev !== 'info'; });
+    var audit = h('details', { class: 'baudit' }, h('summary', null, 'Audit'),
+      h('ul', null,
+        h('li', null, 'Resolution: ' + Math.round(sc.dpi) + ' DPI at ' + U.fmtCm(o.wCm) + ' cm' + (o.settings.treatment === 'halftone' ? ' (dots redrawn crisp at 300)' : '')),
+        h('li', null, 'Contrast on ' + col.name + ': ' + pct(sc.contrast)),
+        h('li', null, 'Treatment: ' + o.label + (o.settings.cellMm && o.settings.treatment !== 'solid' ? ', dots ' + o.settings.cellMm + ' mm' : '') + (o.settings.knockout ? ', knockout on' : '') + (o.settings.cleanup ? ', clean edges' : '')),
+        h('li', null, 'Box use: ' + pct(Math.min(sc.fill, 1)) + (o.sizeNote ? ' (reduced: ' + o.sizeNote + ')' : '')),
+        sc.w.length ? sc.w.map(function (w) { return h('li', { class: 'sev-' + w.sev }, (w.sev === 'high' ? 'Problem: ' : w.sev === 'mid' ? 'Warning: ' : 'Note: ') + w.title); }) : h('li', { class: 'sev-ok' }, 'No warnings')));
+    return h('div', { class: 'bslot' + (c.top ? ' star' : '') },
+      h('div', { class: 'bsh' }, slotName(c.sl)),
+      img,
+      h('div', { class: 'bm' },
+        h('div', { class: 'bn' }, win.d.name, h('span', { class: 'st ' + scoreClass(sc.total) }, sc.total)),
+        h('div', { class: 'tiny' }, o.label + (o.settings.knockout ? ' + knockout' : '')),
+        h('div', { class: 'tiny mono muted' }, fmtSize(o) + (o.sizeNote ? ' · ' + o.sizeNote : '')),
+        h('div', { class: 'tiny ' + (sc.high ? 'sev-high' : probs.length ? 'sev-mid' : 'muted') }, sc.high ? sc.high + ' problem' + (sc.high > 1 ? 's' : '') : probs.length ? probs.length + ' warning' + (probs.length > 1 ? 's' : '') : 'No warnings'),
+        h('div', { class: 'tiny muted' }, 'Why: ' + bestReasons(win, c.ranked[1], col).join('; ')),
+        others.length ? h('div', { class: 'bothers' }, h('span', { class: 'tiny muted' }, 'vs'), others) : null,
+        audit),
       h('div', { class: 'acts' },
         approved ? h('span', { class: 'st ok', style: { flex: 1, justifyContent: 'center' } }, '✓ Approved')
-          : h('button', { class: 'btn sm pri', onclick: function () { approve(pickVariant(win.d, p, col, win.o)); toast('Approved ' + win.d.name + ' on ' + col.name + ' ' + p.name); go('best'); } }, 'Approve best'),
-        h('button', { class: 'btn sm', onclick: function () { var v = pickVariant(win.d, p, col, win.o); persist(v); openLab(v.id); } }, 'Fine-tune')));
+          : h('button', { class: 'btn sm pri', onclick: function (e) { approve(pickVariant(win.d, p, col, o)); toast('Approved ' + p.name + ' ' + col.name + ' · ' + slotName(c.sl)); var b = e.currentTarget; b.replaceWith(h('span', { class: 'st ok', style: { flex: 1, justifyContent: 'center' } }, '✓ Approved')); } }, 'Approve')));
   }
 
   /* ================= VIEWPORT (zoom / pan / split / true-resolution detail) ================= */
@@ -2398,7 +2467,7 @@ PD.guide = (function () {
     }
     var d2 = designById(v.designId);
     if (!d2 || !d2.an) { root.appendChild(spinner('Loading design…')); loadDesign(d2).then(function () { if (S.tab === 'lab') go('lab'); }); return; }
-    if (!S.lab.mockView) S.lab.mockView = v.kind === 'logo' ? (S.dir.side === 'back' ? 'front' : 'back') : S.dir.side;
+    if (!S.lab.mockView) S.lab.mockView = sideOf(v);
 
     var lab = h('div', { class: 'lab' });
     var lp = h('aside', { class: 'lp' }), lc = h('section', { class: 'lc' }), rp = h('aside', { class: 'rp' });
@@ -2463,7 +2532,7 @@ PD.guide = (function () {
     /* every edit goes through here */
     function change(patch, structural) {
       if (S.lab.locked) { toast('Settings are locked'); return; }
-      if (patch.method) { openLab(vkey(v.designId, v.productId, v.colorId, v.kind, v.kind === 'logo' ? 0 : (v.boxCm || boxFor(p)), patch.method)); return; }
+      if (patch.method) { openLab(vkey(v.designId, v.productId, v.colorId, v.kind, v.kind === 'logo' ? 0 : (v.boxCm || boxFor(p)), patch.method, v.side)); return; }
       S.lab.undo.push(snapshot()); if (S.lab.undo.length > 60) S.lab.undo.shift(); S.lab.redo = [];
       if (patch.replace) { v.settings = patch.settings; v.wCm = patch.size.wCm; v.hCm = patch.size.hCm; v.offset = patch.offset; v.userEdited = true; persist(v); }
       else applyPatch(v, patch);
@@ -2502,12 +2571,12 @@ PD.guide = (function () {
       var isEmb = v.method === 'emb';
 
       /* variant */
-      var prodSel = h('select', { disabled: dis || null, onchange: function (e) { var np = C.product(e.target.value); openLab(vkey(v.designId, np.id, np.colors[0].id, v.kind, v.kind === 'logo' ? 0 : boxFor(np), v.method)); } });
+      var prodSel = h('select', { disabled: dis || null, onchange: function (e) { var np = C.product(e.target.value); openLab(vkey(v.designId, np.id, np.colors[0].id, v.kind, v.kind === 'logo' ? 0 : boxFor(np), v.method, v.side)); } });
       C.products().forEach(function (x) { var o = h('option', { value: x.id }, x.name); if (x.id === p.id) o.selected = true; prodSel.appendChild(o); });
       var sws = h('div', { class: 'row' });
-      p.colors.forEach(function (c) { sws.appendChild(h('button', { class: 'sw' + (c.id === col.id ? ' on' : ''), title: c.name + ' ' + c.hex, 'aria-label': c.name, style: { background: c.hex }, onclick: function () { openLab(vkey(v.designId, p.id, c.id, v.kind, v.boxCm, v.method)); } })); });
+      p.colors.forEach(function (c) { sws.appendChild(h('button', { class: 'sw' + (c.id === col.id ? ' on' : ''), title: c.name + ' ' + c.hex, 'aria-label': c.name, style: { background: c.hex }, onclick: function () { openLab(vkey(v.designId, p.id, c.id, v.kind, v.boxCm, v.method, v.side)); } })); });
       lp.appendChild(h('div', { class: 'sec' }, h('div', { class: 'k' }, v.kind === 'logo' ? 'Logo variant' : 'Variant'), prodSel, sws,
-        v.kind === 'main' ? h('div', { class: 'chips' }, p.boxes.map(function (b) { return chip(b + ' cm box', v.boxCm === b, function () { openLab(vkey(v.designId, p.id, col.id, 'main', b, v.method)); }); })) : null,
+        v.kind === 'main' ? h('div', { class: 'chips' }, p.boxes.map(function (b) { return chip(b + ' cm box', v.boxCm === b, function () { openLab(vkey(v.designId, p.id, col.id, 'main', b, v.method, v.side)); }); })) : null,
         h('div', { class: 'chips' }, chip('DTF', !isEmb, function () { change({ method: 'dtf' }); }), chip('Embroidery', isEmb, function () { change({ method: 'emb' }); })),
         h('div', { class: 'tiny muted' }, 'Each box size and method is its own variant with its own settings and approval.')));
 
@@ -2589,7 +2658,7 @@ PD.guide = (function () {
         lp.appendChild(csec);
       }
       /* position */
-      var view = v.kind === 'logo' ? (S.dir.side === 'back' ? 'front left chest' : 'back under collar') : S.dir.side;
+      var view = v.kind === 'logo' ? (S.dir.side === 'back' ? 'front left chest' : 'back under collar') : sideOf(v);
       lp.appendChild(h('div', { class: 'sec' }, h('div', { class: 'k' }, 'Position on garment'),
         h('div', { class: 'small muted' }, 'Placement: ' + view + '. Offset ' + U.fmtCm(v.offset.dx) + ' / ' + U.fmtCm(v.offset.dy) + ' cm.'),
         h('div', { class: 'row' }, [['←', -0.5, 0], ['→', 0.5, 0], ['↑', 0, -0.5], ['↓', 0, 0.5]].map(function (m) {
@@ -2713,7 +2782,7 @@ PD.guide = (function () {
         enqueue(function () {
           var lv = v.kind === 'main' ? logoVariantFor(p.id, col.id) : null;
           return composeVariant(v.kind === 'main' ? tmp : null, v.kind === 'logo' ? tmp : lv, p.id, col.id).then(function (full) {
-            var out = cropTo(full, RD.viewCrop(p, v.kind === 'logo' ? (S.dir.side === 'back' ? 'front' : 'back') : S.dir.side, true), 380);
+            var out = cropTo(full, RD.viewCrop(p, sideOf(v), true), 380);
             cv.width = out.width; cv.height = out.height; U.ctx2d(cv).drawImage(out, 0, 0);
           });
         });
@@ -2745,7 +2814,17 @@ PD.guide = (function () {
     }
     return list;
   }
+  var pngCache = new Map();
   async function renderPng(item) {
+    var v0 = item.v, sn0 = item.snap, col0 = C.color(v0.productId, v0.colorId);
+    var ck = [v0.designId, col0 ? col0.hex : '', sn0.wCm, sn0.hCm, S.exp.dpi, U.stableStringify(P.withDefaults(sn0.settings))].join('|');
+    if (pngCache.has(ck)) return pngCache.get(ck);
+    var r = await renderPngRaw(item);
+    if (pngCache.size > 60) pngCache.delete(pngCache.keys().next().value);
+    pngCache.set(ck, r);
+    return r;
+  }
+  async function renderPngRaw(item) {
     var v = item.v, snap = item.snap, dpi = S.exp.dpi, pxPerMm = dpi / 25.4;
     var tmp = Object.assign({}, v, { settings: P.withDefaults(snap.settings), wCm: snap.wCm, hCm: snap.hCm });
     var c = artFor(tmp, pxPerMm, { stitch: false });
@@ -2764,7 +2843,7 @@ PD.guide = (function () {
       if (pairs.indexOf(n) < 0) pairs.push(n);
     });
     var who = pairs.length > 3 ? pairs.slice(0, 3).join(' + ') + ' +' + (pairs.length - 3) + ' more' : pairs.join(' + ');
-    var place = v.kind === 'logo' ? (S.dir.side === 'back' ? 'Front Left Chest' : 'Back Under Collar') : (S.dir.side === 'back' ? 'Back' : 'Front');
+    var place = v.kind === 'logo' ? (S.dir.side === 'back' ? 'Front Left Chest' : 'Back Under Collar') : (sideOf(v) === 'back' ? 'Back' : 'Front');
     var parts = [who, v.kind === 'logo' ? 'Logo' : d.name, U.fmtCm(snap.wCm) + 'x' + U.fmtCm(snap.hCm) + 'cm', place];
     if (v.method === 'emb') parts.push('Embroidery Reference');
     var name = parts.map(cleanName).join(' - ');
@@ -2809,7 +2888,20 @@ PD.guide = (function () {
     }
     var prog = h('div', { class: 'small muted' });
     var btn = h('button', { class: 'btn pri lg', onclick: function () { runZip(list, btn, prog); } }, 'Download ZIP (' + list.length + ' variant' + (list.length > 1 ? 's' : '') + ')');
-    page.appendChild(h('div', { class: 'row', style: { margin: '6px 0 16px' } }, btn, prog));
+    page.appendChild(h('div', { class: 'row', style: { margin: '6px 0 10px' } }, btn, prog));
+    var byProd = {};
+    list.forEach(function (it) { (byProd[it.v.productId] = byProd[it.v.productId] || []).push(it); });
+    var pids = Object.keys(byProd);
+    if (pids.length > 1) {
+      var pprog = h('div', { class: 'small muted' });
+      page.appendChild(h('div', { class: 'col', style: { margin: '0 0 16px', gap: '6px' } },
+        h('div', { class: 'tiny muted' }, 'Or one ZIP per product (smaller, faster downloads' + (list.length > 40 ? ' — recommended for this many files' : '') + '):'),
+        h('div', { class: 'chips' }, pids.map(function (pid) {
+          var pr = C.product(pid), b2 = h('button', { class: 'btn sm', type: 'button' }, pr.name + ' (' + byProd[pid].length + ')');
+          b2.onclick = function () { runZip(byProd[pid], b2, pprog, 'TEMPORARY - ' + cleanName(pr.name) + ' - Print Files.zip'); };
+          return b2;
+        })), pprog));
+    }
     var tb = h('table', { class: 'tbl' }, h('thead', null, h('tr', null, ['Design', 'Product', 'Color', 'Size', 'Method', 'Treatment', 'Status', ''].map(function (x) { return h('th', null, x); }))));
     var body = h('tbody'); tb.appendChild(body);
     list.forEach(function (it) {
@@ -2822,7 +2914,7 @@ PD.guide = (function () {
     page.appendChild(h('div', { class: 'scrollx' }, tb));
     page.appendChild(h('p', { class: 'tiny muted', style: { marginTop: '14px' } }, 'PNGs are sRGB with transparency and a ' + S.exp.dpi + ' DPI tag. They are artwork files, not a printer RIP job. Embroidery files are flat color references for the vendor to digitize.'));
   }
-  async function runZip(list, btn, prog) {
+  async function runZip(list, btn, prog, zipName) {
     btn.disabled = true;
     try {
       var rendered = [];
@@ -2843,11 +2935,11 @@ PD.guide = (function () {
         rows.push([n, g.map(function (x) { return C.product(x.v.productId).name; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).join(' / '),
           g.map(function (x) { return C.color(x.v.productId, x.v.colorId).name; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).join(' / '),
           g[0].snap.wCm, g[0].snap.hCm, g[0].r.w, g[0].r.h, S.exp.dpi, g[0].v.method === 'emb' ? 'embroidery reference' : 'DTF',
-          g[0].v.kind === 'logo' ? (S.dir.side === 'back' ? 'front left chest' : 'back under collar') : S.dir.side, g.every(function (x) { return x.approved; }) ? 'approved' : 'includes drafts']);
+          g[0].v.kind === 'logo' ? (S.dir.side === 'back' ? 'front left chest' : 'back under collar') : sideOf(g[0].v), g.every(function (x) { return x.approved; }) ? 'approved' : 'includes drafts']);
       });
       if (S.exp.csv) files.push({ name: 'ORDER-LIST.csv', data: new TextEncoder().encode(rows.map(function (r) { return r.map(function (x) { return '"' + String(x).replace(/"/g, '""') + '"'; }).join(','); }).join('\n')) });
       var d = designById(S.designId);
-      var saved = await U.download(U.zip(files), 'TEMPORARY_' + (S.exp.design === 'current' && d ? U.slug(d.name) : 'ALL') + '_PRINT-FILES.zip');
+      var saved = await U.download(U.zip(files), zipName || ('TEMPORARY_' + (S.exp.design === 'current' && d ? U.slug(d.name) : 'ALL') + '_PRINT-FILES.zip'));
       if (!saved) { prog.textContent = 'Save cancelled.'; btn.disabled = false; return; }
       var now = new Date().toISOString();
       rendered.forEach(function (it) { if (it.approved) { it.v.exportedAt = now; persist(it.v); } });
